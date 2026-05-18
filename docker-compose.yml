@@ -1,10 +1,4 @@
 services:
-  # front-end:
-  #   build: ./front-end/auth-app
-  #   depends_on:
-  #     - service-3002
-  #     - service-3001
-  #     - email-services
 
   service-3002:
     build: ./user-services
@@ -92,6 +86,7 @@ services:
         condition: service_started
     networks:
       - app-network
+      - front-end-network
   
   my-rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -145,4 +140,6 @@ volumes:
 
 networks:      
   app-network:
+    driver: bridge
+  front-end-network:
     driver: bridge

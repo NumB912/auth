@@ -10,7 +10,7 @@ import { ServiceConfig } from "@infrastructure/config/host_port.config.js";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin:  ServiceConfig.SERVICE_FRONT_END_URL,
     credentials: true,
   }),
 );
@@ -63,18 +63,6 @@ app.use(
         }
       },
     },
-  }),
-);
-
-app.use(
-  "/frontend",
-  logger,
-  ratelimiter,
-  createProxyMiddleware({
-    target: ServiceConfig.SERVICE_FRONT_END_URL,
-    changeOrigin: true,
-    pathRewrite: { "^/frontend": "" },
-    cookieDomainRewrite: "localhost",
   }),
 );
 

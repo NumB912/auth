@@ -58,10 +58,10 @@ export default class AuthController {
     };
 
     await this.registerEmailUsecase.execute({
-      email,
-      firstName,
-      lastName,
-      password,
+      email:email,
+      firstName:firstName,
+      lastName:lastName,
+      password:password,
     });
   }
 

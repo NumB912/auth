@@ -39,6 +39,8 @@ export default class RegisterEmailUsecase implements IUsecase<void> {
       this.uuidService.randomUUID(),
     ]);
 
+    console.log(registerForm)
+
     const auth_id = await this.repository.createCredential(
       new Credential({
         id: uuid,
