@@ -1,0 +1,148 @@
+services:
+  # front-end:
+  #   build: ./front-end/auth-app
+  #   depends_on:
+  #     - service-3002
+  #     - service-3001
+  #     - email-services
+
+  service-3002:
+    build: ./user-services
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./user-services/.env
+    depends_on:
+      my-redis: 
+        condition: service_healthy
+      my-mongodb:
+        condition: service_healthy
+      my-rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+   
+
+  service-3001:
+    build: ./auth-services
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    env_file:
+      - ./auth-services/.env
+    depends_on:
+      my-redis: 
+        condition: service_healthy
+      my-mongodb:
+        condition: service_healthy
+      my-rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  email-services:
+    build: ./email-services
+    env_file:
+      - ./email-services/.env
+    depends_on:
+      my-rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network 
+
+  file-services:
+    build: ./file-services
+    ports:
+      - "3008:3008"
+    env_file:
+      - ./file-services/.env
+    volumes:
+      - uploads-data:/app/public/uploads
+    networks:
+      - app-network
+
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"  
+      - "8025:8025"  
+    restart: unless-stopped
+    networks:
+    - app-network  
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      service-3002:
+        condition: service_started
+    networks:
+      - app-network
+  
+  my-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"     
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  my-mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  my-redis:                                 
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+volumes:    
+  mongo-data:
+  redis-data:
+  rabbitmq-data:
+  uploads-data:
+  
+
+networks:      
+  app-network:
+    driver: bridge
