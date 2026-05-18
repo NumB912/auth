@@ -1,0 +1,6 @@
+export const ServiceConfig = {
+    SERVICE_AUTH_URL:process.env.SERVICE_AUTH_URL,
+    SERVICE_USER_URL:process.env.SERVICE_USER_URL,
+    SERVICE_PHOTO_URL:process.env.SERVICE_PHOTO_URL,
+    SERVICE_FRONT_END_URL:process.env.SERVICE_FRONT_END_URL
+}
