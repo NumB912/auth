@@ -1,0 +1,3 @@
+[submodule "front-end/auth-app"]
+	path = front-end/auth-app
+	url = https://github.com/NumB912/auth-frontend.git
